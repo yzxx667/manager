@@ -1,17 +1,17 @@
 <template>
-  <h1>欢迎来到登录界面</h1>
-  <weclome msg="jack" />
-  <el-button @click="goHome">回首页</el-button>
+    <h1>欢迎来到登录界面</h1>
+    <!-- <weclome msg="jack" /> -->
+    <el-button @click="goHome">回首页</el-button>
 </template>
 
 <script>
-import request from '../utils/request'
-import Weclome from './Welcome.vue'
+// import request from "../utils/request";
+import Weclome from "./Welcome.vue";
 
 export default {
-  name: 'login',
+  name: "login",
   components: {
-    Weclome
+    Weclome,
   },
   mounted() {
     /*
@@ -31,10 +31,10 @@ export default {
   },
   methods: {
     goHome() {
-      this.$router.push('/weclome')
-    }
-  }
-}
+      this.$router.push("/weclome");
+    },
+  },
+};
 </script>
 
 <style scoped>
