@@ -6,7 +6,7 @@
 
 <script>
   export default {
-    name: 'weclome',
+    name: 'welcome',
     props: ['msg']
   }
 </script>

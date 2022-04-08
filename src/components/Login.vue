@@ -5,18 +5,36 @@
 </template>
 
 <script>
-  import Weclome from './Weclome.vue'
-  export default {
-    name: 'login',
-    components:{
-      Weclome
-    },
-    methods: {
-      goHome(){
-        this.$router.push('/weclome')
+import request from '../utils/request'
+import Weclome from './Welcome.vue'
+
+export default {
+  name: 'login',
+  components: {
+    Weclome
+  },
+  mounted() {
+    /*
+    this.$request({
+      method:'get',
+      url: '/login',
+      data:{
+        name:'jack'
       }
+    }).then( (res)=>{
+      console.log(res)
+    })
+    */
+    //  request.get('/login',{name:'jack'},{mock:true,loading:true}).then((res)=>{
+    //    console.log(res)
+    //  })
+  },
+  methods: {
+    goHome() {
+      this.$router.push('/weclome')
     }
   }
+}
 </script>
 
 <style scoped>

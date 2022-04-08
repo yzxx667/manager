@@ -41,9 +41,28 @@ service.interceptors.response.use((res)=>{
 
 //请求的核心函数
 function request(options){
+    options.methods = options.methods || 'get'
+    if(options.methods.toLowerCase() === 'get'){
+        options.params = options.data
+    }
+
+    if(config.env === 'prod'){
+        service.defaults.baseURL = config.baseApi
+    }else{
+        service.defaults.baseURL = config.mock ? config.mockApi:config.baseApi
+    }
     return service(options)
 }
 
-export default {
-    request
-}
+['get','post','put','delete','patch'].forEach( (item)=>   {
+    request[item] = (url,data,options)=>{
+        return request({
+            url,
+            data,
+            method:item,
+            ...options
+        })
+    }
+})
+
+export default request

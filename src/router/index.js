@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from './../components/Home.vue'
-import Weclome from './../components/Weclome.vue'
+import Welcome from './../components/Welcome.vue'
 import Login from './../components/Login.vue'
 
 const routes = [
@@ -19,7 +19,7 @@ const routes = [
                 meta: {
                     title: '欢迎页'
                 },
-                component: Weclome
+                component: Welcome
             },
             {
                 name: 'login',
