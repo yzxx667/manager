@@ -45,6 +45,10 @@ function request(options){
     if(options.methods.toLowerCase() === 'get'){
         options.params = options.data
     }
+    // 局部mock
+    if(typeof options.mock != 'undefined'){
+        config.mock = options.mock
+    }
 
     if(config.env === 'prod'){
         service.defaults.baseURL = config.baseApi
