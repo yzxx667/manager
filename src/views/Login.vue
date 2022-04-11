@@ -59,11 +59,12 @@ export default {
   },
   methods: {
     login () {
+      // 校验
       this.$refs.userForm.validate((valid)=>{
         if(valid){
           this.$api.login(this.user).then((res)=>{
             this.$store.commit('saveUserInfo',res);
-            this.$router.push('/welcome')
+            this.$router.push('/weclome')
           })
         }else {
           return false
