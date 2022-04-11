@@ -10,6 +10,8 @@ import store from './store'
 
 console.log("环境变量：", import.meta.env)
 const app = createApp(App);
+
+
 // app 挂载对象
 app.config.globalProperties.$request = request;
 app.config.globalProperties.$api = api;
