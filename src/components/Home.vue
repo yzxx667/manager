@@ -1,6 +1,6 @@
 <template>
   <div class="basic-layout">
-    <div :class="['nav-side',isCollapes?'fold':'unfold']">
+    <div :class="['nav-side', isCollapes ? 'fold' : 'unfold']">
       <!-- 系统logo -->
       <div class="logo">
         <img src="../assets/logo.png" alt="" />
@@ -8,32 +8,17 @@
       </div>
       <!-- 导航菜单 -->
       <el-menu
-        default-active="2"
+        :default-active="activeMenu"
         class="nav-menu"
         router
         text-color="#fff"
         :collapse="isCollapes"
         background-color="#001529"
       >
-        <el-sub-menu index="1">
-          <template #title>
-            <el-icon><setting /></el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="1-1">用户管理</el-menu-item>
-          <el-menu-item index="1-2">菜单管理</el-menu-item>
-        </el-sub-menu>
-        <el-sub-menu index="2">
-          <template #title>
-            <el-icon><setting /></el-icon>
-            <span>审批管理</span>
-          </template>
-          <el-menu-item index="2-1">休假审批</el-menu-item>
-          <el-menu-item index="2-2">待我审批</el-menu-item>
-        </el-sub-menu>
+        <tree-menu :userMenu="userMenu" />
       </el-menu>
     </div>
-    <div :class="['content-right',isCollapes?'fold':'unfold']">
+    <div :class="['content-right', isCollapes ? 'fold' : 'unfold']">
       <div class="nav-top">
         <div class="nav-left">
           <div class="menu-fold" @click="toggle">
@@ -42,7 +27,7 @@
           <div class="bread">面包屑</div>
         </div>
         <div class="user-info">
-          <el-badge is-dot class="notice" type="danger">
+          <el-badge :is-dot="noticeCount>0?true:false" class="notice" type="danger">
             <el-icon><bell /></el-icon>
           </el-badge>
           <el-dropdown @command="handleLogout">
@@ -73,6 +58,7 @@
 </template>
 
 <script>
+import TreeMenu from './TreeMenu.vue'
 import { Setting, Expand, Bell } from "@element-plus/icons-vue";
 export default {
   name: "Home",
@@ -80,25 +66,46 @@ export default {
     Setting,
     Expand,
     Bell,
+    TreeMenu
   },
   data() {
     return {
-      isCollapes:false,
-      UserInfo: {
-        userName: "jack",
-        userEmail: "jack@123.com",
-      },
+      isCollapes: false,
+      UserInfo: this.$store.state.userInfo,
+      noticeCount: 0,
+      userMenu: [],
+      activeMenu: location.hash.slice(1)
     };
   },
+  mounted() {
+    this.getNoticeCount();
+    this.getMenuList()
+  },
   methods: {
-    toggle(){
-      this.isCollapes = !this.isCollapes
+    toggle() {
+      this.isCollapes = !this.isCollapes;
     },
     handleLogout(key) {
       if (key == "email") return;
       this.$store.commit("saveUserInfo", "");
       this.userInfo = null;
       this.$router.push("/login");
+    },
+    async getNoticeCount() {
+      try {
+        const count = await this.$api.noticeCount();
+        this.noticeCount = count;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async getMenuList() {
+      try {
+        const list = await this.$api.getMenuList();
+        this.userMenu = list;
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 };
@@ -132,22 +139,22 @@ export default {
       border-right: none;
     }
     // 合并
-    &.fold{
+    &.fold {
       width: 64px;
     }
     // 展开
-    &.unfold{
+    &.unfold {
       width: 200px;
     }
   }
   .content-right {
     margin-left: 200px;
     // 合并
-    &.fold{
+    &.fold {
       margin-left: 64px;
     }
     // 展开
-    &.unfold{
+    &.unfold {
       margin-left: 200px;
     }
     .nav-top {
@@ -172,7 +179,7 @@ export default {
         line-height: 30px;
         margin-right: 15px;
       }
-      .user-link{
+      .user-link {
         line-height: 47px;
         cursor: pointer;
         color: #409eff;

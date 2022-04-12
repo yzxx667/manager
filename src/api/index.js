@@ -8,5 +8,19 @@ export default {
             data:params,
             // mock:false
         })
+    },
+    noticeCount(params){
+        return request({
+            url:'/leave/count',
+            method:'get',
+            data:{}
+        })
+    },
+    getMenuList(params){
+        return request({
+            url:'/menu/list',
+            method:'get',
+            data:{}
+        })
     }
 }
