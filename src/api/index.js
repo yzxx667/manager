@@ -13,14 +13,24 @@ export default {
         return request({
             url:'/leave/count',
             method:'get',
-            data:{}
+            data:{},
+            mock:true
         })
     },
     getMenuList(params){
         return request({
             url:'/menu/list',
             method:'get',
-            data:{}
+            data:{},
+            mock:true
+        })
+    },
+    getUserList(params){
+        return request({
+            url:'/users/list',
+            method:'get',
+            data:params,
+            mock:true
         })
     }
 }

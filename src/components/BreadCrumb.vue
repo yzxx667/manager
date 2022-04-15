@@ -8,8 +8,12 @@
 </template>
 
 <script>
+import { ArrowRight } from '@element-plus/icons-vue'
 export default {
   name: "Breadcrumb",
+  components:{
+    ArrowRight
+  },
   computed:{
     breadList(){
       return this.$route.matched
