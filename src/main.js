@@ -16,4 +16,4 @@ const app = createApp(App);
 app.config.globalProperties.$request = request;
 app.config.globalProperties.$api = api;
 app.config.globalProperties.$storage = storage;
-app.use(router).use(store).use(ElementPuls,{size:'small'}).mount('#app')
+app.use(router).use(store).use(ElementPuls).mount('#app')

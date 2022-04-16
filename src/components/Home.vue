@@ -83,6 +83,7 @@ export default {
   mounted() {
     this.getNoticeCount();
     this.getMenuList()
+    
   },
   methods: {
     toggle() {
