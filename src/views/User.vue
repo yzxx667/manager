@@ -18,7 +18,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button @click="handleReset('form')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -39,7 +39,9 @@
         />
         <el-table-column label="操作" width="150">
           <template #default="scope">
-            <el-button size="small">编辑</el-button>
+            <el-button size="small" @click="handleEdit(scope.row)"
+              >编辑</el-button
+            >
             <el-button type="danger" size="small" @click="handleDel(scope.row)"
               >删除</el-button
             >
@@ -66,12 +68,17 @@
           <el-input
             v-model="userForm.userName"
             placeholder="请输入用户名称"
+            :disabled="action == 'edit'"
           ></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="userEmail">
-          <el-input v-model="userForm.userEmail" placeholder="请输入用户邮箱">
-            <template #append>@imooc.com </template
-          ></el-input>
+          <el-input
+            v-model="userForm.userEmail"
+            placeholder="请输入用户邮箱"
+            :disabled="action == 'edit'"
+          >
+            <template #append>@imooc.com </template></el-input
+          >
         </el-form-item>
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="userForm.mobile" placeholder="请输入用户手机号">
@@ -91,30 +98,43 @@
           </el-select>
         </el-form-item>
         <el-form-item label="系统角色" prop="roleList">
-          <el-select v-model="userForm.roleList" placeholder="请选择系统juese">
-            <el-option></el-option>
+          <el-select
+            v-model="userForm.roleList"
+            placeholder="请选择系统角色"
+            multiple
+            style="width: 100%"
+          >
+            <el-option
+              v-for="role in roleList"
+              :key="role._id"
+              :label="role.roleName"
+              :value="role._id"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="部门" prop="deptId">
           <el-cascader
             v-model="userForm.deptId"
             placeholder="请选择所属部门"
-            :options="[]"
+            :options="deptList"
             :props="{ checkStrictly: true, value: '_id', label: 'deptName' }"
             clearable
+            style="width: 100%"
           ></el-cascader>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button>取 消</el-button>
-        <el-button type="primary">确 定</el-button>
-      </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button type="primary" @click="handleSubmit">确定</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>s
 
 <script>
-import { getCurrentInstance, onMounted, reactive, ref } from "vue";
+import { getCurrentInstance, onMounted, reactive, ref, toRaw } from "vue";
 export default {
   name: "user",
   setup() {
@@ -133,9 +153,15 @@ export default {
     // 弹框显示对象
     const showModal = ref(false);
     // 新增form对象
-    const userForm = ref({
-      state:3
+    const userForm = reactive({
+      state: 3,
     });
+    // 所有角色列表
+    const roleList = ref([]);
+    // 所有部门列表
+    const deptList = ref([]);
+    // 定义用户操作的行为
+    const action = ref("add");
     // 定义表单规则
     const rules = reactive({
       userName: [
@@ -152,14 +178,14 @@ export default {
           trigger: "blur",
         },
       ],
-       mobile: [
+      mobile: [
         {
           pattern: /1{3-9}\d{9}/,
           message: "请输入正确的手机号格式",
           trigger: "blur",
         },
       ],
-       deptId: [
+      deptId: [
         {
           required: true,
           message: "请输入部门",
@@ -213,6 +239,8 @@ export default {
     ]);
     onMounted(() => {
       getUserList();
+      getRoleList();
+      getDepList();
     });
     const getUserList = async () => {
       let params = { ...user, ...pager };
@@ -231,8 +259,8 @@ export default {
     };
 
     // 重置
-    const handleReset = () => {
-      proxy.$refs.form.resetFields();
+    const handleReset = (form) => {
+      proxy.$refs[form].resetFields();
     };
 
     // 分页事件
@@ -279,7 +307,55 @@ export default {
 
     // 用户新增
     const handleCreate = () => {
+      action.value = "add";
       showModal.value = true;
+    };
+
+    // 部门列表
+    const getDepList = async () => {
+      let list = await proxy.$api.getDeptList();
+      deptList.value = list;
+    };
+
+    // 角色列表查询
+    const getRoleList = async () => {
+      let list = await proxy.$api.getRoleList();
+      roleList.value = list;
+    };
+
+    // 用户弹窗关闭
+    const handleClose = () => {
+      showModal.value = false;
+      handleReset("dialogForm");
+    };
+
+    // 用户提交
+    const handleSubmit = () => {
+      //校验
+      proxy.$refs.dialogForm.validate(async (valid) => {
+        if (valid) {
+          const params = Object.assign({}, toRaw(userForm));
+          params.userEmail += "@imooc.com";
+          params.action = action.value;
+          // console.log(params)
+          let res = await proxy.$api.userSubmit(params);
+          if (res) {
+            showModal.value = false;
+            proxy.$message.success("用户创建成功");
+            handleReset("dialogForm");
+            getUserList();
+          }
+        }
+      });
+    };
+
+    // 用户编辑
+    const handleEdit = (row) => {
+      action.value = "edit";
+      showModal.value = true;
+      proxy.$nextTick(() => {
+        Object.assign(userForm, row);
+      });
     };
     return {
       user,
@@ -298,6 +374,14 @@ export default {
       showModal,
       userForm,
       rules,
+      getDepList,
+      getRoleList,
+      roleList,
+      deptList,
+      handleClose,
+      handleSubmit,
+      handleEdit,
+      action,
     };
   },
 };
