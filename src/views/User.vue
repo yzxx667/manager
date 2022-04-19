@@ -9,11 +9,11 @@
           <el-input v-model="user.userName" placeholder="请输入用户名称" />
         </el-form-item>
         <el-form-item label="状态" prop="state">
-          <el-select v-model="user.state">
+          <el-select v-model="user.state" :popper-append-to-body="false">
             <el-option label="所有" :value="0" />
             <el-option label="在职" :value="1" />
-            <el-option label="离职" :value="1" />
-            <el-option label="试用期" :value="1" />
+            <el-option label="离职" :value="2" />
+            <el-option label="试用期" :value="3" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -91,7 +91,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item label="状态" prop="state">
-          <el-select v-model="userForm.state">
+          <el-select v-model="userForm.state" :popper-append-to-body="false">
             <el-option label="在职" :value="1"></el-option>
             <el-option label="离职" :value="2"></el-option>
             <el-option label="试用期" :value="3"></el-option>
@@ -103,6 +103,7 @@
             placeholder="请选择系统角色"
             multiple
             style="width: 100%"
+            :popper-append-to-body="false"
           >
             <el-option
               v-for="role in roleList"
@@ -112,7 +113,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="部门" prop="deptId">
+        <el-form-item label="部门" prop="deptId" >
           <el-cascader
             v-model="userForm.deptId"
             placeholder="请选择所属部门"
@@ -120,6 +121,7 @@
             :props="{ checkStrictly: true, value: '_id', label: 'deptName' }"
             clearable
             style="width: 100%"
+            :popper-append-to-body="false"
           ></el-cascader>
         </el-form-item>
       </el-form>
@@ -135,12 +137,13 @@
 
 <script>
 import { getCurrentInstance, onMounted, reactive, ref, toRaw } from "vue";
+import utils from './../utils/utils'
 export default {
   name: "user",
   setup() {
     const { proxy } = getCurrentInstance();
     const user = reactive({
-      state: 0,
+      state: 1,
     });
     const userList = ref([]);
     const pager = reactive({
@@ -180,7 +183,8 @@ export default {
       ],
       mobile: [
         {
-          pattern: /1{3-9}\d{9}/,
+          // required: true,
+          pattern: /1[3-9]\d{9}/,
           message: "请输入正确的手机号格式",
           trigger: "blur",
         },
@@ -231,10 +235,17 @@ export default {
       {
         label: "注册时间",
         prop: "createTime",
+        width:180,
+        formatter:(row,column,value)=>{
+          return utils.formateDate(new Date(value))
+        }
       },
       {
         label: "最后登录时间",
         prop: "lastLoginTime",
+        formatter:(row,column,value)=>{
+          return utils.formateDate(new Date(value))
+        }
       },
     ]);
     onMounted(() => {
@@ -339,12 +350,10 @@ export default {
           params.action = action.value;
           // console.log(params)
           let res = await proxy.$api.userSubmit(params);
-          if (res) {
             showModal.value = false;
             proxy.$message.success("用户创建成功");
             handleReset("dialogForm");
             getUserList();
-          }
         }
       });
     };
