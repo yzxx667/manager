@@ -21,8 +21,8 @@ export default {
         return request({
             url:'/menu/list',
             method:'get',
-            data:{},
-            mock:true
+            data:params,
+            mock:false
         })
     },
     getUserList(params){
@@ -49,6 +49,14 @@ export default {
             mock:true
         })
     },
+    getRoleFormList(params){
+        return request({
+            url:'/roles/list',
+            method:'get',
+            data:params,
+            mock:true
+        })
+    },
     getDeptList(){
         return request({
             url:'/dept/list',
@@ -70,7 +78,7 @@ export default {
             url:'/menu/operate',
             method:'post',
             data:params,
-            mock:true
+            mock:false
         })
     }
 }

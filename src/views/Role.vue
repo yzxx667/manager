@@ -2,17 +2,8 @@
   <div class="user-manage">
     <div class="query-form">
       <el-form ref="form" :inline="true" :model="queryForm">
-        <el-form-item label="菜单名称" prop="memuName">
-          <el-input v-model="queryForm.menuName" placeholder="请输入菜单名称" />
-        </el-form-item>
-        <el-form-item label="菜单状态" prop="menuState">
-          <el-select
-            v-model="queryForm.menuState"
-            :popper-append-to-body="false"
-          >
-            <el-option label="正常" :value="1" />
-            <el-option label="停用" :value="2" />
-          </el-select>
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="queryForm.menuName" placeholder="请输入角色名称" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
@@ -25,9 +16,7 @@
         <el-button type="primary" @click="handleAdd(1)">创建</el-button>
       </div>
       <el-table
-        :data="menuList"
-        row-key="_id"
-        :tree-props="{ children: 'children' }"
+        :data="roleList"
       >
         <el-table-column width="20" />
         <el-table-column
@@ -40,11 +29,11 @@
         />
         <el-table-column label="操作" width="220">
           <template #default="scope">
-            <el-button size="small" @click="handleAdd(2, scope.row)" type="primary"
-              >新增</el-button
+            <el-button size="small" type="primary" @click="handleEdit(scope.row)"
+              >编辑</el-button
             >
             <el-button size="small" @click="handleEdit(scope.row)"
-              >编辑</el-button
+              >设置权限</el-button
             >
             <el-button type="danger" size="small" @click="handleDel(scope.row._id)"
               >删除</el-button
@@ -52,17 +41,17 @@
           </template>
         </el-table-column>
       </el-table>
-      <!-- <el-pagination
+      <el-pagination
         class="pagination"
         background
         layout="prev, pager, next,jumper"
         :total="pager.total"
         :page-size="pager.pageSize"
         @current-change="handleCurrentChange"
-      /> -->
+      />
     </div>
 
-    <el-dialog title="创建菜单" v-model="showModal">
+    <!-- <el-dialog title="创建菜单" v-model="showModal">
       <el-form
         :model="menuForm"
         label-width="100px"
@@ -125,106 +114,61 @@
           <el-button type="primary" @click="handleSubmit">确定</el-button>
         </span>
       </template>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script>
-import utils from "./../utils/utils";
+import utils from "../utils/utils";
 export default {
   name: "menu",
   data() {
     return {
       queryForm: {
-        menuState: 1,
+        roleName: "",
       },
-      menuList: [],
+      roleList:[],
+      //分页,
+      pager:{
+        total:0,
+        pageSize:10
+      },
       columns: [
         {
-          label: "菜单名称",
-          prop: "menuName",
+          label: "角色名称",
+          prop: "roleName",
           width: 180,
         },
         {
-          label: "图标",
-          prop: "icon",
+          label: "备注",
+          prop: "remark",
+           width:200
         },
         {
-          label: "菜单类型",
-          prop: "menuType",
-          formatter(row, colum, value) {
-            return {
-              1: "菜单",
-              2: "按钮",
-            }[value];
-          },
-        },
-        {
-          label: "权限标识",
-          prop: "menuCode",
-        },
-        {
-          label: "路由地址",
-          prop: "path",
-        },
-        {
-          label: "组件路径",
-          prop: "component",
-        },
-        {
-          label: "菜单状态",
-          prop: "menuState",
-          width: 90,
-          formatter(row, colum, value) {
-            return {
-              1: "正常",
-              2: "停用",
-            }[value];
-          },
+          label: "权限列表",
+          prop: "permissionList",
+          width:280
         },
         {
           label: "创建时间",
-          width: 150,
+          width: 300,
           prop: "createTime",
           formatter(row, colum, value) {
             return utils.formateDate(new Date(value));
           },
         },
       ],
-      // 菜单按钮单选
-      menuForm: {
-        menuType: "1",
-        menuState: "1",
-      },
-      // 展示dialog
-      showModal: false,
-      // 增加还是编辑表单
-      action: "",
-      // 表单校验
-      rules: {
-        menuName: [
-          {
-            required: true,
-            message: "请输入菜单名称",
-            trigger: "blur",
-          },
-          {
-            min: 2,
-            max: 6,
-            trigger: "blur",
-          },
-        ],
-      },
     };
   },
   mounted() {
-    this.getMenuList();
+    this.getRoleList()
   },
   methods: {
-    async getMenuList() {
+    async getRoleList() {
       try {
-        let list = await this.$api.getMenuList(this.queryForm);
-        this.menuList = list;
+        let { list , page } = await this.$api.getRoleFormList(this.queryForm);
+        this.roleList = list;
+        this.pager.total = page.total
       } catch (error) {
         throw new Error(error);
       }
