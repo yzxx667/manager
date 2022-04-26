@@ -80,5 +80,13 @@ export default {
             data:params,
             mock:false
         })
+    },
+    roleSubmit(params){
+        return request({
+            url:'/roles/operate',
+            method:'post',
+            data:params,
+            mock:true
+        })
     }
 }

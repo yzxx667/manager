@@ -13,7 +13,7 @@
     </div>
     <div class="base-table">
       <div class="action">
-        <el-button type="primary" @click="handleAdd(1)">创建</el-button>
+        <el-button type="primary" @click="handleAdd()">创建</el-button>
       </div>
       <el-table
         :data="roleList"
@@ -51,61 +51,26 @@
       />
     </div>
 
-    <!-- <el-dialog title="创建菜单" v-model="showModal">
+    <el-dialog title="用户新增" v-model="showModal">
       <el-form
-        :model="menuForm"
+        :model="roleForm"
         label-width="100px"
         :rules="rules"
-        ref="menudialog"
+        ref="roledialog"
       >
-        <el-form-item label="父级菜单" prop="parentId">
-          <el-cascader
-            v-model="menuForm.parentId"
-            :options="menuList"
-            :props="{ checkStrictly: true, value: '_id', label: 'menuName' }"
-            :popper-append-to-body="false"
-            clearable
-          ></el-cascader>
-          <span>不选，则直接创建一级菜单</span>
-        </el-form-item>
-        <el-form-item label="菜单类型" prop="menuType">
-          <el-radio v-model="menuForm.menuType" label="1">菜单</el-radio>
-          <el-radio v-model="menuForm.menuType" label="2">按钮</el-radio>
-        </el-form-item>
-        <el-form-item label="菜单名称" prop="menuName">
+        <el-form-item label="角色名称" prop="roleName">
           <el-input
-            v-model="menuForm.menuName"
-            placeholder="请输入用户菜单名称"
+            v-model="roleForm.roleName"
+            placeholder="请输入角色名称"
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="菜单图标" prop="icon" v-show="menuForm.menuType == 1">
+        <el-form-item label="备注" prop="remark">
           <el-input
-            v-model="menuForm.icon"
-            placeholder="请输入菜单图标"
+            type="textarea"
+            v-model="roleForm.remark"
+            placeholder="请输入备注"
           ></el-input>
-        </el-form-item>
-        <el-form-item label="路由地址" prop="path" v-show="menuForm.menuType == 1">
-          <el-input
-            v-model="menuForm.path"
-            placeholder="请输入路由地址"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="权限标识" prop="menuCode" v-show="menuForm.menuType == 2">
-          <el-input
-            v-model="menuForm.menuCode"
-            placeholder="请输入权限标识"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="组件路径" prop="component" v-show="menuForm.menuType == 1">
-          <el-input
-            v-model="menuForm.component"
-            placeholder="请输入组件路径"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="菜单状态" prop="menuState" v-show="menuForm.menuType == 1">
-          <el-radio v-model="menuForm.menuState" label="1">正常</el-radio>
-          <el-radio v-model="menuForm.menuState" label="2">停用</el-radio>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -114,7 +79,7 @@
           <el-button type="primary" @click="handleSubmit">确定</el-button>
         </span>
       </template>
-    </el-dialog> -->
+    </el-dialog>
   </div>
 </template>
 
@@ -127,6 +92,13 @@ export default {
       queryForm: {
         roleName: "",
       },
+      // 操作类型,
+      action:'',
+      //角色信息
+      roleForm:{
+
+      },
+      showModal:false,
       roleList:[],
       //分页,
       pager:{
@@ -158,6 +130,15 @@ export default {
           },
         },
       ],
+      rules:{
+        roleName:[
+          {
+            required:true,
+            message:'请输入角色名称',
+            trigger:'blur'
+          }
+        ]
+      }
     };
   },
   mounted() {
@@ -179,35 +160,32 @@ export default {
     handleReset(form) {
        this.$refs[form].resetFields();
     },
-    handleAdd(type, row) {
+    handleAdd() {
+      this.action = 'create'
       this.showModal = true;
-      this.action = "add";
-      if (type == 2) {
-        this.menuForm.parentId = [...row.parentId, row._id].filter((item)=>item)
-      }
     },
     handleEdit(row) {
       this.showModal = true
       this.action = 'edit'
       this.$nextTick(()=>{
-       Object.assign(this.menuForm,row)
+       Object.assign(this.roleForm,row)
       })
     },
     async handleDel(_id) {
-      await this.$api.menuSubmit({_id,action:'delete'});
-      this.getMenuList()
+      await this.$api.roleSubmit({_id,action:'delete'});
+      this.getRoleList()
       this.$message.success('删除成功')
     },
     handleSubmit() {
-      this.$refs.menudialog.validate(async (valid) => {
+      this.$refs.roledialog.validate(async (valid) => {
         if (valid) {
-          let action = this.action;
-          let params = { action, ...this.menuForm };
-          let res = await this.$api.menuSubmit(params);
-          this.$message.success('提交成功')
+          let {action,roleForm} = this
+          let params = {action,...roleForm}
+          let res = await this.$api.roleSubmit(params)
+          this.$message.success('操作成功')
           this.showModal = false
-          this.handleReset('menudialog')
-          await this.getMenuList()
+          this.handleReset('roledialog')
+          this.getRoleList()
         }else{
           this.$message.error('提交失败')
         }
@@ -215,8 +193,9 @@ export default {
     },
     handleClose(){
       this.showModal = false
-      this.handleReset('menudialog')
-    }
+      this.handleReset('roledialog')
+    },
+    handleCurrentChange(){}
   },
 };
 </script>
