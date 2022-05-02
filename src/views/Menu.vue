@@ -27,9 +27,9 @@
       <el-table
         :data="menuList"
         row-key="_id"
-        :tree-props="{ children: 'children' }"
+        :tree-props="{ children: 'children' ,hasChildren: 'hasChildren'}"
       >
-        <el-table-column width="20" />
+        <!-- <el-table-column width="20" /> -->
         <el-table-column
           v-for="item in columns"
           :key="item.prop"
@@ -263,7 +263,7 @@ export default {
           this.$message.success('提交成功')
           this.showModal = false
           this.handleReset('menudialog')
-          await this.getMenuList()
+          this.getMenuList()
         }else{
           this.$message.error('提交失败')
         }
